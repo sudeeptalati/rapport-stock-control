@@ -16,16 +16,12 @@ $this->menu=array(
 	'dataProvider'=>$model->search(),
 	'filter'=>$model,
 	'columns'=>array(
-	//	'id',
+		'id',
 		'name',
 		'address',
 		'town',
-		//'postcode_s',
-		array(
-			'name'=>'postcode',
-			'value'=>'$data->postcode_s." ".$data->postcode_e',
-		),
-		
+		'postcode',
+
 	//	'country',
         array(
       		'name'=>'prefered_supplier',

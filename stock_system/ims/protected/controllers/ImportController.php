@@ -59,12 +59,12 @@ class ImportController extends Controller
 
 
 
-public function uploadfile($_FILES)
+public function uploadfile($tempfile)
 {
 //echo "---------------";
-	$target_path = "temp/". basename( $_FILES['uploadedfile']['name']);
+	$target_path = "temp/". basename( $tempfile['uploadedfile']['name']);
 
-	if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $target_path))
+	if(move_uploaded_file($tempfile['uploadedfile']['tmp_name'], $target_path))
 	{
 		//echo "The file ".  basename( $_FILES['uploadedfile']['name']). " has been uploaded<BR>";
 		return $target_path;

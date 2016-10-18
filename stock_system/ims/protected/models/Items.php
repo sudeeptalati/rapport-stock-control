@@ -30,6 +30,15 @@
  * @property string $modified
  * @property string $deleted
  *
+ * @property string $stock_date
+ * @property string $purchase_date
+ * @property string $unit_price
+ * @property string $vat_percentage
+ * @property string $vat_amount
+ * @property string $total_price_exc_vat
+ * @property string $total_price_inc_vat
+ * @property string $comments
+
  * The followings are the available model relations:
  * @property InboundItemsHistory[] $inboundItemsHistories
  * @property ItemOnOrder[] $itemOnOrders
@@ -66,19 +75,18 @@ class Items extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('part_number, name, current_quantity, available_quantity', 'required'),
+			array('unit_price, vat_percentage, vat_amount, total_price_exc_vat, total_price_inc_vat, name, current_quantity, available_quantity', 'required'),
 			array('company_id, category_id, active, suppliers_id', 'numerical', 'integerOnly'=>true),
-			array('current_quantity, available_quantity, recommended_lowest_quantity, recommended_highest_quantity, sale_price', 'numerical'),
-			array('part_number', 'length', 'max'=>255),
-			array('location_room, location_row, location_column, location_shelf, image_url, factory_due_date, fits_in_model, created, modified, deleted', 'safe'),
-			
-		
+			array('unit_price, vat_percentage, vat_amount, total_price_exc_vat, total_price_inc_vat, current_quantity, available_quantity, recommended_lowest_quantity, recommended_highest_quantity, sale_price', 'numerical'),
+			array('part_number,description, remarks,  stock_date, purchase_date, unit_price, vat_percentage, vat_amount, total_price_exc_vat, total_price_inc_vat, , comments, location_room, location_row, location_column, location_shelf, image_url, factory_due_date, fits_in_model, created, modified, deleted', 'safe'),
+
 			//customised rulers. 
 			array('available_quantity, current_quantity', 'nonzero'),
-			array('part_number,barcode','unique','message'=>'{attribute}:{value} already exists!'),
+			array('barcode','unique','message'=>'{attribute}:{value} already exists!'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('supplier_name, item_id, company_id, part_number, name, description, barcode, location_room, location_row, location_column, location_shelf, category_id, current_quantity, available_quantity, recommended_lowest_quantity, recommended_highest_quantity, remarks, image_url, sale_price, factory_due_date, suppliers_id, fits_in_model', 'safe', 'on'=>'search'),
+			//array('stock_date, supplier_name, item_id, company_id, part_number, name, description, barcode, location_room, location_row, location_column, location_shelf, category_id, current_quantity, available_quantity, recommended_lowest_quantity, recommended_highest_quantity, remarks, image_url, sale_price, factory_due_date, suppliers_id, fits_in_model', 'safe', 'on'=>'search'),
+			array('item_id, company_id, part_number, name, description, barcode, location_room, location_row, location_column, location_shelf, category_id, current_quantity, available_quantity, recommended_lowest_quantity, recommended_highest_quantity, remarks, active, image_url, sale_price, factory_due_date, suppliers_id, fits_in_model, created, modified, deleted, stock_date, purchase_date, unit_price, vat_percentage, vat_amount, total_price_exc_vat, total_price_inc_vat, comments', 'safe', 'on'=>'search'),
 
 			);
 	}
@@ -107,28 +115,33 @@ class Items extends CActiveRecord
 	
 	protected function beforeSave()
 	{
+
+        $setupmodel = Setup::model();
+
+		if (!empty($this->stock_date))
+			$this->stock_date=strtotime($this->stock_date);
+
+		if (!empty($this->purchase_date))
+			$this->purchase_date=strtotime($this->purchase_date);
+
+		if (!empty($this->factory_due_date))
+			$this->factory_due_date=strtotime($this->factory_due_date);
 		
+		$this->company_id=0;
+		$this->category_id=0;
 		
 		if(parent::beforeSave())
 		{
-			
-			$this->company_id=0;
-			$this->category_id=0;
-			$this->active=1;
-			$this->factory_due_date=strtotime($this->factory_due_date);
-			
-			
 			if($this->isNewRecord)
 			{
-				
 				$this->created=time();
 				$this->modified=time();
-			}
+                $this->comments=$setupmodel->initiatetimestampnotesorcomments($this->comments);
+            }
 			else
 			{
-				
 				$this->modified=time();
-				//$this->modified=date("d/m/Y h:i:s a", time());
+                $this->comments=$setupmodel->updatenotesorcomments($this->comments, $this, 'comments');
 			}
 			return true;
 		}
@@ -151,30 +164,45 @@ class Items extends CActiveRecord
 		return array(
 			'item_id' => 'Item',
 			'company_id' => 'Company',
-			'part_number' => 'Part Number',
+			'part_number' => 'Alternate Part Numbers (Part number by different sellers)',
 			'name' => 'Name',
 			'description' => 'Description',
 			'barcode' => 'Barcode',
-			'location_room' => 'Location Room',
-			'location_row' => 'Location Row',
-			'location_column' => 'Location Column',
-			'location_shelf' => 'Location Shelf',
 			'category_id' => 'Category',
-			'current_quantity' => 'Current Quantity',
-			'available_quantity' => 'Available Quantity',
-			'recommended_lowest_quantity' => 'Recommended Lowest Quantity',
-			'recommended_highest_quantity' => 'Recommended Highest Quantity',
-			'remarks' => 'Remarks',
-			'active' => 'Active',
+            'active' => 'Active',
 			'image_url' => 'Image Url',
-			'sale_price' => 'Sale Price',
-			'factory_due_date' => 'Factory Due Date',
+
+            'location_room' => 'Location Room',
+            'location_row' => 'Location Row',
+            'location_column' => 'Location Column',
+            'location_shelf' => 'Location Shelf',
+
+
+            'available_quantity' => 'Available Quantity',
+            'current_quantity' => 'Current Quantity',
+            'recommended_lowest_quantity' => 'Recommended Lowest Quantity',
+            'recommended_highest_quantity' => 'Recommended Highest Quantity',
+
+            'factory_due_date' => 'Factory Due Date',
 			'suppliers_id' => 'Suppliers',
 			'fits_in_model' => 'Fits In Model',
 			'created' => 'Created',
 			'modified' => 'Last Modified',
 			'deleted' => 'Deleted',
 			'status' => 'Status',
+
+			'stock_date' => 'Stock Date',
+			'purchase_date	' => 'Purchase Date',
+
+            'sale_price' => 'Sale Price (Inc VAT)',
+            'unit_price' => 'Unit Price (Exc VAT)',
+            'vat_percentage' => 'Vat % (Unit Price)',
+			'vat_amount' => 'VAT Amount (Unit Price)',
+            'total_price_exc_vat' => 'Total Price (Exc. VAT)',
+            'total_price_inc_vat' => 'Total Price (Inc. VAT)',
+
+            'comments' => 'Comments',
+            'remarks' => 'Remarks',
 		);
 	}
 
@@ -184,16 +212,12 @@ class Items extends CActiveRecord
 	 */
 	public function search()
 	{
-		// Warning: Please modify the following code to remove attributes that
-		// should not be searched.
+		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
-		
-		//$criteria->with = array('suppliers');
-		$criteria->order = 'name ASC';
-		
+
 		$criteria->compare('item_id',$this->item_id);
-		//$criteria->compare('company_id',$this->company_id);
+		$criteria->compare('company_id',$this->company_id);
 		$criteria->compare('part_number',$this->part_number,true);
 		$criteria->compare('name',$this->name,true);
 		$criteria->compare('description',$this->description,true);
@@ -207,64 +231,174 @@ class Items extends CActiveRecord
 		$criteria->compare('available_quantity',$this->available_quantity);
 		$criteria->compare('recommended_lowest_quantity',$this->recommended_lowest_quantity);
 		$criteria->compare('recommended_highest_quantity',$this->recommended_highest_quantity);
-//		$criteria->compare('remarks',$this->remarks,true);
-//		$criteria->compare('active',$this->active);
-//		$criteria->compare('image_url',$this->image_url,true);
-//		$criteria->compare('sale_price',$this->sale_price);
-//		$criteria->compare('factory_due_date',$this->factory_due_date,true);
-//		$criteria->compare('suppliers_id',$this->suppliers_id);
+		$criteria->compare('remarks',$this->remarks,true);
+		$criteria->compare('active',$this->active);
+		$criteria->compare('image_url',$this->image_url,true);
+		$criteria->compare('sale_price',$this->sale_price);
+		$criteria->compare('factory_due_date',$this->factory_due_date,true);
+		$criteria->compare('suppliers_id',$this->suppliers_id);
 		$criteria->compare('fits_in_model',$this->fits_in_model,true);
-//		$criteria->compare('created',$this->created,true);
-//		$criteria->compare('modified',$this->modified,true);
-//		$criteria->compare('deleted',$this->deleted,true);
-
+		$criteria->compare('created',$this->created,true);
+		$criteria->compare('modified',$this->modified,true);
+		$criteria->compare('deleted',$this->deleted,true);
+		$criteria->compare('stock_date',$this->stock_date,true);
+		$criteria->compare('purchase_date',$this->purchase_date,true);
+		$criteria->compare('unit_price',$this->unit_price,true);
+		$criteria->compare('vat_percentage',$this->vat_percentage,true);
+		$criteria->compare('vat_amount',$this->vat_amount,true);
+		$criteria->compare('total_price_exc_vat',$this->total_price_exc_vat,true);
+		$criteria->compare('total_price_inc_vat',$this->total_price_inc_vat,true);
+		$criteria->compare('comments',$this->comments,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
 		));
-		
-//		return new CActiveDataProvider( 'Items', array(
-//				'criteria'=>$criteria,
-//				'sort'=>array(
-//						'attributes'=>array(
-//								'supplier_name'=>array(
-//										'asc'=>'suppliers.name',
-//										'desc'=>'suppliers.name DESC',
-//								),
-//								'*',
-//						),
-//				),
-//		));
 	}
 	
 	public function freeSearch($keyword)
 	{	
 		
-		/*Creating a new criteria for search*/
 		$criteria = new CDbCriteria;
-		
-		
 		$criteria->compare('name', $keyword, true, 'OR');
 		$criteria->compare('barcode', $keyword, true, 'OR');
 		$criteria->compare('part_number', $keyword, true, 'OR');
 
-		
+
+		$criteria2 = new CDbCriteria;
+		$criteria2->compare('active', '1', false);
+
+		$criteria->mergeWith($criteria2, 'AND');
+
 		/*result limit*/
-		$criteria->limit = 100;
+		//$criteria->limit = 100;
 		/*When we want to return model*/
-		return	Items::model()->findAll($criteria);
+		//return	Items::model()->findAll($criteria);
 		
 		/*To return active dataprovider uncomment the following code*/
-		/*
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
+			'pagination'=>false,
 		));
-		*/
+
 		
 	}
+
+
+
+	public function getinboundhistoryofthisitem($item_id)
+	{
+		$inbounds=InboundItemsHistory::model()->findAllByAttributes(array('main_item_id'=>$item_id));
+		return $inbounds;
+
+	}///end of 	public function getinboundhistoryofthisitem($item_id)
+
+	public function getoutboundhistoryofthisitem($item_id)
+	{
+		$outbounds=OutboundItemsHistory::model()->findAllByAttributes(array('main_item_id'=>$item_id));
+		return $outbounds;
+
+	}///end of 	public function getoutboundhistoryofthisitem($item_id)
+
+
+
+	public function generateyearlystockvaluedata()
+	{
+
+		$result_data=array();
+
+		$allitems=Items::model()->findAll();
+
+
+		$report_dates=AdvanceSettings::model()->getdatesforyearlyreport();
+
+
+
+
+
+
+		$run_for_years=8;
+
+		$present_year=date('Y');
+
+		$current_year=$present_year-$run_for_years+1;
+		$previous_year=$present_year-$run_for_years;
+		$full_yearly_data=array();
+
+		for($i=0;$i<$run_for_years;$i++){
+
+
+
+			$yearlydata=array();
+
+			$yearlydata['int_start_date']=mktime(0, 0, 0, $report_dates['start_month'],$report_dates['start_day'] , $previous_year);
+			$yearlydata['int_end_date']=mktime(23, 59, 59, $report_dates['end_month'],$report_dates['end_day'] , $current_year);
+
+			$criteria=new CDbCriteria();
+			$criteria->addBetweenCondition('stock_date', $yearlydata['int_start_date'], $yearlydata['int_end_date']);
+			$yearlystockeditems=Items::model()->findAll($criteria);
+
+			$yearlydata['data']=$this->totalvaluesofitems($yearlystockeditems);
+			$yearlydata['stock_start_date']=date('d-M-y H:i:s', $yearlydata['int_start_date']);
+			$yearlydata['stock_end_date']=date('d-M-y H:i:s', $yearlydata['int_end_date']);
+
+			$full_yearly_data[$previous_year.'-'.$current_year]=$yearlydata;
+			//$full_yearly_data[$yearlydata['stock_start_date'].'-'.$yearlydata['stock_end_date']]=$yearlydata;
+			$current_year++;
+			$previous_year++;
+
+		}////end of 		for($i=0;$i<5;$i++)
+
+
+		$other_info=array();
+		$other_info['date_range']='Date Range per Year from '.date('d-F', $yearlydata['int_start_date']).' to '.date('d-F', $yearlydata['int_end_date']);
+
+
+		$result_data['yearly_data']=$full_yearly_data;
+
+
+		$result_data['totalvalueofallstock']=$this->totalvaluesofitems($allitems);
+		$result_data['other_info']=$other_info;
+
+
+		return $result_data;
+
+
+
+	}///end of 	public function generateyearlystockvaluedata()
+
+
+	public function totalvaluesofitems($items)
+	{
+		$alltotalarray=array();
+
+		$alltotalarray['total_exc_vat']=0;
+		$alltotalarray['total_vat_amount']=0;
+		$alltotalarray['total_inc_vat']=0;
+
+		foreach ($items as $item) {
+			$alltotalarray['total_exc_vat']=$alltotalarray['total_exc_vat']+($item->unit_price*$item->current_quantity);
+			$alltotalarray['total_vat_amount']=$alltotalarray['total_vat_amount']+($item->vat_amount*$item->current_quantity);
+			$alltotalarray['total_inc_vat']=$alltotalarray['total_inc_vat']+($item->sale_price*$item->current_quantity);
+
+
+		}
+
+		$alltotalarray['total_exc_vat']='£ '.$alltotalarray['total_exc_vat'];
+		$alltotalarray['total_vat_amount']='£ '.$alltotalarray['total_vat_amount'];
+		$alltotalarray['total_inc_vat']='£ '.$alltotalarray['total_inc_vat'];
+
+
+		return $alltotalarray;
+	}///end of 	public function totalvaluesofitems($items)
+
 	
-	
-	
-    
-    
+	public function formatdate()
+	{
+	  if ($this->stock_date===null)
+		return;
+
+	  return Yii::app()->dateFormatter->format("d-M-y", $this->stock_date);
+	}
+
+
 }

@@ -87,4 +87,25 @@ class AdvanceSettings extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+
+
+
+	public function getdatesforyearlyreport()
+	{
+
+		$stats_report_dates=array();
+		$stats_report_dates['start_day']='06';
+		$stats_report_dates['start_month']='4';
+		$stats_report_dates['end_day']='05';
+		$stats_report_dates['end_month']='4';
+
+		return $stats_report_dates;
+		
+	}///end of public function getdatesforyearlyreport
+
+
+
+
+
+
 }

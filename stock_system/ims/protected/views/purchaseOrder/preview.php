@@ -202,7 +202,9 @@ $this->menu=array(
 		?>
 		
 	</tr>
-		<tr>
+	
+	
+	<tr>
 		<th colspan="5" style="text-align: right"><?php echo $form->labelEx($model,'total_cost'); ?></th>
 		<td colspan="2" ><?php 	echo $form->textField($model,'total_cost', array('disabled'=>'disabled'));
 					echo $form->error($model,'total_cost'); ?>
@@ -231,6 +233,14 @@ $this->menu=array(
 	
 	</table>
 	
+	
+	<div>
+	<h4>Summary</h4>
+	Total Order Value : <b><?php echo $model->total_cost;?></b>
+	<br>
+	</div>
+	
+		<br>
 	<div class="row buttons">
 		<?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Finalise Order'); ?>
 	</div>
@@ -240,7 +250,7 @@ $this->menu=array(
 	</div>
 	
 	<!-- THIRD PART OF FORM WHICH DISPLAYS ADMIN VIEW OF ITEMS -->
-	
+	<hr>
 
 	<?php 
 		echo $this->forward('/Items/purchaseOrderList',false); 

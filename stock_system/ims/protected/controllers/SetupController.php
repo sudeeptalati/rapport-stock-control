@@ -31,7 +31,7 @@ class SetupController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('Disableinternet','Enableinternet','restoreDatabase', 'about', 'changeLogo', 'create','update','mailServer','mailSettings','ShowUpdateProgress'),
+				'actions'=>array('otherdevices','Disableinternet','Enableinternet','restoreDatabase', 'about', 'changeLogo', 'create','update','mailServer','mailSettings','ShowUpdateProgress'),
 				'users'=>array('@'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
@@ -385,19 +385,33 @@ class SetupController extends Controller
 	}//end of showUpdateProgress().
 	
 	public function curl_file_get_contents($request)
+
 	{
+
 		$curl_req = curl_init($request);
+
 	
+
 	
+
 		curl_setopt($curl_req, CURLOPT_URL, $request);
+
 		curl_setopt($curl_req, CURLOPT_RETURNTRANSFER, TRUE);
+
 		curl_setopt($curl_req, CURLOPT_HEADER, FALSE);
+
 	
+
 		$contents = curl_exec($curl_req);
+
 	
+
 		curl_close($curl_req);
+
 	
+
 		return $contents;
+
 	}///end of curl_file_get_contents($request)
 	
 	
@@ -418,6 +432,12 @@ class SetupController extends Controller
 		Yii::app()->controller->redirect($current_url);
 	}//end of showUpdateProgress().
 	
+	
+	public function actionOtherdevices()
+	{
+		$this->render('otherdevices');
+		
+	}///public function actionOtherdevices()
 	
 	
 	

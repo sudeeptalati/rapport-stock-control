@@ -3,7 +3,8 @@
 	
 	header('Content-type: application/json');
 	
-	$results = array ('results'=>'YaaIamTheOneYouAreLookingFor');
+	$secret_key=Setup::model()->getsecretkey();
+	$results = array ('results'=>$secret_key);
 	
 	echo CJSON::encode($results);
 	//$json_file=CJSON::encode($model);

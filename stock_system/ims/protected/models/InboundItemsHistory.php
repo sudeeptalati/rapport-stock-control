@@ -13,6 +13,15 @@
  * @property integer $user_id
  * @property integer $items_on_order_id
  * @property string $created
+ * @property integer $supplier_id
+ * @property integer $item_purchase_date
+
+ * @property integer $unit_price_exc_vat
+ * @property integer $unit_price_inc_vat
+ * @property integer $vat_amount
+ * @property integer $vat_percentage
+ * @property integer $total_amount_exc_vat
+ * @property integer $total_amount_inc_vat
  *
  * The followings are the available model relations:
  * @property UsergroupsUser $user
@@ -23,6 +32,8 @@ class InboundItemsHistory extends CActiveRecord
 {
 	public $item_search;
 	public $part_number;
+	public $barcode;
+
 	public $username;
 	/**
 	 * Returns the static model of the specified AR class.
@@ -49,13 +60,13 @@ class InboundItemsHistory extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('main_item_id, quantity_moved, current_quantity_in_stock, available_quantity_in_stock', 'required'),
+			array('supplier_id, main_item_id, quantity_moved, current_quantity_in_stock, available_quantity_in_stock', 'required'),
 			array('main_item_id, user_id, items_on_order_id', 'numerical', 'integerOnly'=>true),
-			array('quantity_moved, current_quantity_in_stock, available_quantity_in_stock', 'numerical'),
-			array('comments, created', 'safe'),
+			array('unit_price_exc_vat, unit_price_inc_vat, vat_amount, vat_percentage, total_amount_exc_vat, total_amount_inc_vat,  supplier_id, quantity_moved, current_quantity_in_stock, available_quantity_in_stock', 'numerical'),
+			array('item_purchase_date, supplier_id, comments, created', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('history_id_item, main_item_id, quantity_moved, current_quantity_in_stock, available_quantity_in_stock, comments, user_id, items_on_order_id, created', 'safe', 'on'=>'search'),
+			array('supplier_id, history_id_item, main_item_id, quantity_moved, current_quantity_in_stock, available_quantity_in_stock, comments, user_id, items_on_order_id, created', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -71,6 +82,9 @@ class InboundItemsHistory extends CActiveRecord
 			'user' => array(self::BELONGS_TO, 'User', 'user_id'),
 			'itemsOnOrder' => array(self::BELONGS_TO, 'ItemOnOrder', 'items_on_order_id'),
 			'mainItem' => array(self::BELONGS_TO, 'Items', 'main_item_id'),
+			'supplier' => array(self::BELONGS_TO, 'Suppliers', 'supplier_id'),
+
+
 		);
 	}
 
@@ -89,13 +103,28 @@ class InboundItemsHistory extends CActiveRecord
 			'user_id' => 'Processed By User',
 			'items_on_order_id' => 'Purchase Order No.',
 			'created' => 'Processed On',
-		);
+			'supplier_id' => 'Supplier',
+			'item_purchase_date'=> 'Item Purchase Date',
+
+			'unit_price_exc_vat' => 'Unit Price (Exc VAT)',
+			'unit_price_inc_vat' => 'Unit Price (Inc VAT) ',
+			'vat_amount' => 'VAT Amount',
+			'vat_percentage' => 'VAT Percentage',
+			'total_amount_exc_vat' => 'Total Amount (Exc VAT)',
+			'total_amount_inc_vat' => 'Total Amount (Inc VAT)',
+
+			);
 	}
 	
 protected function beforeSave()
 	{
 		if(parent::beforeSave())
 		{
+
+			if (!empty($this->item_purchase_date))
+				$this->item_purchase_date=strtotime($this->item_purchase_date);
+
+
 			if($this->isNewRecord)
 			{
 				$this->created=time();

@@ -10,7 +10,8 @@ $this->menu=array(
 );
 ?>
 
-<h1>Supplier <?php echo $model->name; ?></h1>
+<h1>Supplier # <?php echo $model->id; ?></h1>
+<h1>Supplier # <?php echo $model->name; ?></h1>
 <div style="text-align: right;">
 <?php echo CHtml::link('Edit',array('update', 'id'=>$model->id)); ?>
 </div>
@@ -19,18 +20,14 @@ $this->menu=array(
 <?php $this->widget('zii.widgets.CDetailView', array(
 	'data'=>$model,
 	'attributes'=>array(
-	//	'id',	
+		'id',
 		'name',
 		'contact_person',
 		'address',
 		'town',
-// 		'postcode_s',
-// 		'postcode_e',
-		array(
-			'name'=>'postcode',
-			//'value'=>'$data->postcode_s." ".$data->postcode_e',
-			'value'=>$model->postcode_s." ".$model->postcode_e,
-		),
+
+		'postcode',
+
 		'country',
 		'contact_number',
 		'email',

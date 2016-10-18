@@ -9,6 +9,9 @@ $this->menu=array(
 	array('label'=>'Internet', 'url'=>array('/advanceSettings/update&id=10001')),
 	array('label'=>'Restore Database', 'url'=>array('setup/restoreDatabase')),
 	array('label'=>'Import Data', 'url'=>array('import/simpleitemsimport')),
+	array('label'=>'Other Devices', 'url'=>array('setup/otherdevices')),
 	array('label'=>'About & Help', 'url'=>array('setup/about')),
+	
+	
 );
 ?>

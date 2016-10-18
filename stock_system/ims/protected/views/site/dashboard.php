@@ -26,7 +26,9 @@
 			{
 			$update_url = $setupModel->version_update_url;		
 			$request = $update_url.'/latest_stocksystem_version.txt';
-			$available_version = curl_file_get_contents($request, true);
+			//$available_version = file_get_contents($request, true);
+			
+			$available_version = file_get_contents($request, true);
 			$installed_version=Yii::app()->params['software_version'];
 			if ($available_version>$installed_version)
 				{	?>

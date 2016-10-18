@@ -88,7 +88,7 @@ class InboundItemsHistoryController extends Controller
 														);														
 			
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->history_id_item));
+				$this->redirect(array('/items/view','id'=>$model->main_item_id));
 		
 			}
 			

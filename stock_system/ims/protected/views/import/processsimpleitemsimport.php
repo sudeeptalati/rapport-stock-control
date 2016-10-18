@@ -73,11 +73,19 @@ function updateItem($line_of_text)
 		$model->location_shelf=$line_of_text[6];
 		$model->barcode=$line_of_text[7];
 		$model->description=$line_of_text[8];
-		 
-		
-	 
- 
-		
+
+		$model->stock_date=strtotime($line_of_text[9]);
+		$model->unit_price=$line_of_text[10];
+		$model->vat_amount=$line_of_text[11];
+		$model->sale_price=$line_of_text[12];
+		$model->total_price_inc_vat=$line_of_text[13];
+		$model->suppliers_id=$line_of_text[14];
+
+
+
+
+
+
 		if ($model->save())
 		{
 			echo '<tr style="background-color:#EAF2D3"><td>'.$model->part_number.'</td><td>'.$model->name.'</td><td>Item Saved</td><td></td> </tr>';

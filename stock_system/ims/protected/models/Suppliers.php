@@ -8,7 +8,6 @@
  * @property string $name
  * @property string $address
  * @property string $town
- * @property string $postcode_s
  * @property string $country
  * @property string $contact_number
  * @property string $email
@@ -56,7 +55,7 @@ class Suppliers extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('name, town, postcode_s,postcode_e country, contact_number, email', 'required'),
+			array('name, town, postcode, country, contact_number, email', 'required'),
 			array('lead_time_days, prefered_supplier, active', 'numerical', 'integerOnly'=>true),
 			array('free_carriage_min_amt', 'numerical'),
 			array('address, website, vat_reg_no, logo_url,created, modified, active, api_url, contact_person', 'safe'),
@@ -90,8 +89,7 @@ class Suppliers extends CActiveRecord
 			'name' => 'Supplier Name',
 			'address' => 'Address',
 			'town' => 'Town',
-			'postcode_s' => 'Postcode_s',
-			'postcode_e' => 'Postcode_e',
+			'postcode' => 'Postcode',
 			'country' => 'Country',
 			'contact_number' => 'Contact Number',
 			'email' => 'Email',
@@ -147,8 +145,7 @@ class Suppliers extends CActiveRecord
 		$criteria->compare('name',$this->name,true);
 		$criteria->compare('address',$this->address,true);
 		$criteria->compare('town',$this->town,true);
-		$criteria->compare('postcode_s',$this->postcode_s,true);
-		$criteria->compare('postcode_e',$this->postcode_e,true);
+		$criteria->compare('postcode',$this->postcode,true);
 		$criteria->compare('country',$this->country,true);
 		$criteria->compare('contact_number',$this->contact_number,true);
 		$criteria->compare('email',$this->email,true);
@@ -166,4 +163,14 @@ class Suppliers extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+
+
+
+	public function getactivesupplierslist()
+	{
+		return  CHtml::listData(Suppliers::model()->findAll(array('condition' => 'active=1', 'order' => "`name` ASC")), 'id', 'name');
+
+	}
+
+
 }

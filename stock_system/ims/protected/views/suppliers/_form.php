@@ -1,5 +1,14 @@
 <div class="form">
 
+	<?php
+	$model->town='na';
+	$model->postcode='na';
+	$model->email='na@na.com';
+	$model->contact_number='na';
+	$model->country='na';
+
+	?>
+
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'suppliers-form',
 	'enableAjaxValidation'=>false,
@@ -13,6 +22,7 @@
 		<?php echo $form->labelEx($model,'name'); ?>
 		<?php echo $form->textField($model,'name',array('rows'=>6, 'cols'=>50)); ?>
 		<?php echo $form->error($model,'name'); ?>
+		<?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Save'); ?>
 	</div>
 	
 	<div class="row">
@@ -35,16 +45,11 @@
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'postcode_s'); ?>
-		<?php echo $form->textField($model,'postcode_s'); ?>
-		<?php echo $form->error($model,'postcode_s'); ?>
+		<?php echo $form->labelEx($model,'postcode'); ?>
+		<?php echo $form->textField($model,'postcode'); ?>
+		<?php echo $form->error($model,'postcode'); ?>
 	</div>
-	
-	<div class="row">
-		<?php echo $form->labelEx($model,'postcode_e'); ?>
-		<?php echo $form->textField($model,'postcode_e'); ?>
-		<?php echo $form->error($model,'postcode_e'); ?>
-	</div>
+
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'country'); ?>

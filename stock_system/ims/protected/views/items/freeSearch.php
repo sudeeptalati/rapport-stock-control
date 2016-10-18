@@ -1,141 +1,183 @@
-<?php
+<?php $this->layout = 'column1'; ?>
 
-$this->menu=array(
-	array('label'=>'List Items', 'url'=>array('index')),
-	array('label'=>'Add New Items', 'url'=>array('create')),
-);
+
+
+
+<body onload="document.search_form.query.focus()">
+<?php
+$baseUrl = Yii::app()->baseUrl;
+$cs = Yii::app()->getClientScript();
+$cs->registerScriptFile($baseUrl . '/js/jquery.js');
 
 ?>
 
-<body onload="document.search_form.query.focus()">
- <?php 
-  $baseUrl = Yii::app()->baseUrl; 
-  $cs = Yii::app()->getClientScript();
-  $cs->registerScriptFile($baseUrl.'/js/jquery.js');
-  
-  ?>
 
-  <div class="admin">
-  
-  <script type="text/javascript">
- 
- 
-$(document).ready(function() {
+<script type="text/javascript">
 
 
-$("#faq_search_input").keyup(function()
+    $(document).ready(function () {
+		doitemsearch();
+        //showvalueofstockeachyear();
+        $("#faq_search_input").keyup(function () {
+			doitemsearch();
+        });
+    });
 
-{
-var faq_search_input = $(this).val();
-var dataString = 'keyword='+ faq_search_input;
+    ////////declaring keypressed function
+    function keyPressed(e) {
+        var key;
+        if (window.event)
+            key = window.event.keyCode; //IE
+        else
+            key = e.which; //firefox
 
-var ref_id = $('#ref_id').val(); 
-var cust_id = $('#cust_id').val(); 
-var current_url = $('#current_url').val(); 
+        if (key == 13)///checking the value of enter key press which is 13
+        {
+            return false;
+        } else {
+            return true;
+        }////end of else if (key == 13)
+    }/////end of function keypressed ..
 
-
-if(faq_search_input.length>3)
-
-{
-
-$.ajax({
-type: "GET",
-url: current_url,
-data: dataString+"&refid="+ref_id+"&custid="+cust_id,
-beforeSend:  function() {
-
-$('input#faq_search_input').addClass('loading');
-
-},
-success: function(server_response)
-{
-
-$('#searchresultdata').html(server_response).show();
-$('span#faq_category_title').html(faq_search_input);
-
-if ($('input#faq_search_input').hasClass("loading")) {
- $("input#faq_search_input").removeClass("loading");
-        } 
-
-}
-});
-}return false;
-});
-});
-	 
-////////declaring keypressed function
-function keyPressed(e)
-{ 
- 	 var key;      
-     if(window.event)
-          key = window.event.keyCode; //IE
-     else
-          key = e.which; //firefox      
-
-	if (key == 13)///checking the value of enter key press which is 13
+	function doitemsearch()
 	{
-		return false;
-	}else
-	{
-		return true;
-	}////end of else if (key == 13)
-}/////end of function keypressed ..    
+	    var faq_search_input =$("#faq_search_input").val();
+        var dataString = 'keyword=' + faq_search_input;
+
+
+        if (faq_search_input.length > 3) {
+
+                $.ajax({
+                    type: "GET",
+                    url: 'index.php?r=items/searchEngine',
+                    data: dataString,
+                    success: function (server_response) {
+                        $('#searchresultdata').html(server_response).show();
+
+
+                    }
+                });
+            }
+            return false;
+	
+	}////end of function doitemsearch()
+
+
+</script>
+
+
+
+<table>
+    <tr>
+        <td>Enter Item Name, Part Number or barcode<br><br>
+            <!-- The Searchbox Starts Here  -->
+            <form name="search_form">
+                <input name="query" type="text" onKeyPress="return keyPressed(event);" id="faq_search_input" placeholder="search by barcode, item name or part number  "
+                       style=" width:500px; height: 25px; border-radius:5px;  background-color: #F8F8F8"/>
+            </form>
+            <!-- The Searchbox Ends  Here  -->
+
+        </td>
+        <td>
+
+            <div style="background: #FAF88D;border-radius: 12px; float: right; padding: 10px;">
+                <table>
+                    <tr>
+                        <td>
+                            <a style="text-decoration: blink;color:#3A290D;" class="fa fa-list fa-2x"></a>
+                        </td>
+                        <td><?php echo CHtml::link('  List Items', array('items/index'), array('style' => 'text-decoration: blink;color:#3A290D; font-size: 18px;    font-weight: bold;')); ?></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a style="text-decoration: blink;color:#3A290D;" class="fa fa-plus-circle fa-2x"></a>
+                        </td>
+                        <td><?php echo CHtml::link('  Create Item', array('items/create'), array('style' => 'text-decoration: blink;color:#3A290D; font-size: 18px;    font-weight: bold;')); ?></td>
+                    </tr>
+    				<tr>
+                        <td>
+                            <a style="text-decoration: blink;color:#3A290D;" class="fa fa-sign-in fa-2x"></a>
+                        </td>
+                        <td><?php echo CHtml::link('Show Inbound History', array('inboundItemsHistory/admin'), array('style' => 'text-decoration: blink;color:#3A290D; font-size: 18px;    font-weight: bold;')); ?></td>
+                    </tr>
+	               <tr>
+                        <td>
+                            <a style="text-decoration: blink;color:#3A290D;" class="fa fa-sign-out fa-2x"></a>
+                        </td>
+                        <td><?php echo CHtml::link('Show Outbound History', array('outboundItemsHistory/admin'), array('style' => 'text-decoration: blink;color:#3A290D; font-size: 18px;    font-weight: bold;')); ?></td>
+                    </tr>
+                </table>
+            </div>
+
+        </td>
+    </tr>
+</table>
+
+
+
+
+<div id="searchresultdata" class="faq-articles"></div>
+
+
+
+<!-- Statistics -->
+
+
+
+<div id='value_of_stock_div'>
+    <button  class="fa fa-bar-chart"  onclick="showvalueofstockeachyear();">Show Yearly Statistics</button>
+</div>
+
+<div id="stats_results"></div>
+
+
+
+<script>
+    //window.onload = showvalueofstockeachyear;
+    function showvalueofstockeachyear() {
+
+        dataString='';
+      
+
+        $.ajax({
+            type: "GET",
+            url: 'index.php?r=items/yearlyvalueofstockstats',
+            data: dataString,
+            success: function (server_response) {
+                $('#searchresultdata').html(server_response).show();
+                document.getElementById('value_of_stock_div').style.display = 'none';
+
+
+            }
+        });
+        
+        
+        $.ajax({
+            type: "GET",
+            url: 'index.php?r=items/getyearlydataofstockjson',
+            data: dataString,
+            success: function (server_response) {
+            	 formatdataforgooglegraphs(server_response)
+
+
+            }
+        });
+        
+        
+        
+    }
+
+
 
 
 
 
 </script>
 
-<?php
-
-
-//$url=Yii::app()->request->baseUrl;
-$reference_id = 88;
-$model_name=Yii::app()->controller->id;
-////$current_url=$baseUrl."/".$model_name;
-
-$current_url=$baseUrl.'/index.php?r=items/searchEngine';
-
-/*
-echo "<br>****************<br>";
-echo $current_url;
-echo "<br>****************<br>";
-*/
-
-
-//$reference_id=$current_url;
-
-$customer_id = 77;
-
-//echo "Model Name   :".$current_url;
-
-/*
-echo "<br>".$baseUrl."<br>";
-
-echo "Adding the Seller for ";
-echo "Customer no :<br>".$customer_id ;
-
-
-echo "<br>Adding the Seller for ";
-echo "Service ref no :".$reference_id ;
-*/
-
-
-
-?>
-
- 
-	<input type="hidden" id="current_url" value="<?php echo $current_url;?>"/> 
-	<input type="hidden" id="ref_id" value="<?php echo $reference_id ;?>"/> 
-	<input type="hidden" id="cust_id" value="<?php echo $customer_id ;?>"/>  
-              Enter Item Name, Part Number or barcode<br><br>
-              <!-- The Searchbox Starts Here  -->
-              <form  name="search_form">
-              <input  name="query" type="text" onKeyPress="return keyPressed(event);" id="faq_search_input" style="background-color: #FFFFFF" />
-              </form>
-             <!-- The Searchbox Ends  Here  -->
-       <div id="searchresultdata" class="faq-articles"> </div>
-     </div><BR>
-
-
+<hr>
+<br>
 <?php echo $this->renderPartial('/site/dashboard'); ?>
+ 
+
+
+

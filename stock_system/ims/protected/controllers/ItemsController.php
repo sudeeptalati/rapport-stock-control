@@ -33,7 +33,7 @@ class ItemsController extends Controller
 			),
 			*/
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update','InboundSearch','OutboundSearch','admin','FreeSearch','SearchEngine','PurchaseOrderList','index','view'),
+				'actions'=>array('getyearlydataofstockjson','yearlyvalueofstockstats', 'generatebarcodelabel','create','update','InboundSearch','OutboundSearch','admin','FreeSearch','SearchEngine','PurchaseOrderList','index','view'),
 				'users'=>array('@'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
@@ -67,7 +67,7 @@ class ItemsController extends Controller
 		$model=new Items;
 
 		// Uncomment the following line if AJAX validation is needed
-		// $this->performAjaxValidation($model);
+		$this->performAjaxValidation($model);
 
 		if(isset($_POST['Items']))
 		{
@@ -92,7 +92,7 @@ class ItemsController extends Controller
 		//$actual_quantity=$model->current_quantity;
 
 		// Uncomment the following line if AJAX validation is needed	
-		// $this->performAjaxValidation($model);
+		 $this->performAjaxValidation($model);
 		
 		if(isset($_POST['Items']))
 		{
@@ -105,6 +105,10 @@ class ItemsController extends Controller
 			
 			if($model->save())
 			{
+			
+				$this->redirect(array('view','id'=>$model->item_id));
+
+				/*
 				$original_quantity=$_POST['original_quantity'];
 				$original_available_quantity=$_POST['original_available_quantity'];
 				//echo "Actual ".$original_quantity;
@@ -112,7 +116,7 @@ class ItemsController extends Controller
 				if($original_quantity==$model->current_quantity && $original_available_quantity==$model->available_quantity)
 				{
 					//echo "value is same";
-					$this->redirect(array('view','id'=>$model->item_id));
+
 					
 				}
 				
@@ -219,7 +223,7 @@ class ItemsController extends Controller
 					//$this->redirect(array('view','id'=>$model->item_id));
 					
 				}//end of 4th elseif
-				
+				*/
 				}//end of if(model->save())
 		}//if(isset($_POST['Items']))
 
@@ -268,96 +272,18 @@ class ItemsController extends Controller
 	/**
 	 * Manages all models.
 	 */
+	
 	public function actionAdmin()
 	{
-		//echo "i am admin";
 		$model=new Items('search');
-		$model->unsetAttributes();  // clear any default values		
-		
-		//for excel.
-		
-		if( isset( $_GET[ 'export' ] ) )
-        {
-        		header( "Content-Type: application/vnd.ms-excel; charset=utf-8" );
-           		header( "Content-Disposition: inline; filename=\"Items Stock  ".date("F j, Y").".xls\"" );
-
-                        $dataProvider = $model->search();
-                        $dataProvider->pagination = False;
-                        ?>
-                        
-                    <table border="1"> <tr>
-					<th>item_id</th>
-					<th>Company_id</th>
-					<th>Part Number</th>
-					<th>Part Name</th>
-					<th>description</th>
-					<th>barcode</th>
-					<th>Location Room</th>
-					<th>Location Row</th>
-					<th>Location Column</th>
-					<th>Location Shelf</th>
-					<th>Category_id</th>
-					<th>Available Quantity</th>
-					<th>Current Quantity</th>
-					<th>recommended_lowest_quantity </th>
-					<th>recommended_highest_quantity</th>
-					<th>remarks</th>
-					<th>active</th>
-					<th>created</th>
-					<th>modified</th>
-					<th>deleted</th>
-					</tr>
-                   
-				<?php
-			//echo "item_id \t company_id \t part_number \t name \t description \t barcode \t location_room \t location_row \t location_column \t location_shelf \t category_id \t current_quantity \t available_quantity \t recommended_lowest_quantity \t recommended_highest_quantity \t remarks \t active \t created \t modified \t deleted \n";
-			foreach( $dataProvider->data as $data )
-			{
-				if ($data->available_quantity>0)
-				{
-					echo "<tr>";
-	 				echo "<td>".$data->item_id."</td>";
-	 				echo "<td>".$data->company_id."</td>";
-	 				echo "<td>".$data->part_number."</td>";
-	 				echo "<td>".$data->name."</td>";
-	 				echo "<td>".$data->description."</td>";
-	 				echo "<td>".$data->barcode."</td>";
-	 				echo "<td>".$data->location_room."</td>";
-	 				echo "<td>".$data->location_row."</td>";
-	 				echo "<td>".$data->location_column."</td>";
-	 				echo "<td>".$data->location_shelf."</td>";
-	 				echo "<td>".$data->category_id."</td>";
-	 				echo "<td>".$data->current_quantity."</td>";
-	 				echo "<td>".$data->available_quantity."</td>";
-	 				echo "<td>".$data->recommended_lowest_quantity."</td>";
-	 				echo "<td>".$data->recommended_highest_quantity."</td>";
-	 				echo "<td>".$data->remarks."</td>";
-	 				echo "<td>".$data->active."</td>";
-	 				echo "<td>".$data->created."</td>";
-	 				echo "<td>".$data->modified."</td>";
-	 				echo "<td>".$data->deleted."</td>";
-					echo "</tr>";
-				
-				}//end of if($data).
-				
-				//echo $data->item_id, "\t",$data->company_id, "\t", $data->part_number, "\t", $data->name, "\t", $data->description, "\t", $data->barcode, "\t", $data->location_room,  "\t",$data->location_row, "\t", $data->location_column, "\t", $data->location_shelf, "\t", $data->category_id, "\t", $data->current_quantity, "\t", $data->available_quantity, "\t", $data->recommended_lowest_quantity, "\t", $data->recommended_highest_quantity, "\t", $data->remarks, "\t", $data->active, "\t", $data->created, "\t", $data->modified, "\t", $data->deleted,"\n";
-			}//end foreach
-		?>
-		</table>
-		<?php 
-			
-			Yii::app()->end();
-			
-		}//end of if(isset())
-		
+		$model->unsetAttributes();  // clear any default values
 		if(isset($_GET['Items']))
 			$model->attributes=$_GET['Items'];
-	   	
-	   	$this->render('admin',array(
+
+		$this->render('admin',array(
 			'model'=>$model,
 		));
-		
-
-	}//end of admin.
+	}
 
 	/**
 	 * Returns the data model based on the primary key given in the GET variable.
@@ -574,4 +500,120 @@ class ItemsController extends Controller
 	}
 	
 	
+	
+	
+	public function actionGeneratebarcodelabel($id)
+	{
+		$model=$this->loadModel($id);
+	
+		$this->renderPartial('generatebarcodelabel',array(
+				'model'=>$model,
+		));
+	
+	}///end of public function actionGeneratebarcodelabel($id)
+	
+
+
+	public function actionYearlyvalueofstockstats()
+	{
+		$data='<h1>Statistics</h1>';
+
+		$model=new Items();
+
+		$data=$model->generateyearlystockvaluedata();
+
+		///As this isa array you need to convert it into string and then convert it into json object
+		$json_data_string= json_encode($data);
+		$json_data=json_decode($json_data_string);
+
+		//echo $json_data->totalvalueofallstock->total_exc_vat;
+
+		//echo json_encode($data);
+
+		$this->renderPartial('statistics',array('json_data'=>$json_data,'json_data_string'=>$json_data_string));
+		//$this->render('statistics',array('json_data'=>$json_data,'json_data_string'=>$json_data_string));
+
+
+
+	}///end of	public function actionStatistics()
+
+	public function actionGetyearlydataofstockjson()
+	{	
+		$model=new Items();
+		$data=$model->generateyearlystockvaluedata();
+		echo json_encode($data);
+	}
+	
+	protected function exporttoexcel($dataProvider)
+	{
+		header( "Content-Type: application/vnd.ms-excel; charset=utf-8" );
+		header( "Content-Disposition: inline; filename=\"Items Stock  ".date("F j, Y").".xls\"" );
+
+		$dataProvider = $model->search();
+		$dataProvider->pagination = False;
+		?>
+
+		<table border="1"> <tr>
+				<th>item_id</th>
+				<th>Company_id</th>
+				<th>Part Number</th>
+				<th>Part Name</th>
+				<th>description</th>
+				<th>barcode</th>
+				<th>Location Room</th>
+				<th>Location Row</th>
+				<th>Location Column</th>
+				<th>Location Shelf</th>
+				<th>Category_id</th>
+				<th>Available Quantity</th>
+				<th>Current Quantity</th>
+				<th>recommended_lowest_quantity </th>
+				<th>recommended_highest_quantity</th>
+				<th>remarks</th>
+				<th>active</th>
+				<th>created</th>
+				<th>modified</th>
+				<th>deleted</th>
+			</tr>
+
+			<?php
+			//echo "item_id \t company_id \t part_number \t name \t description \t barcode \t location_room \t location_row \t location_column \t location_shelf \t category_id \t current_quantity \t available_quantity \t recommended_lowest_quantity \t recommended_highest_quantity \t remarks \t active \t created \t modified \t deleted \n";
+			foreach( $dataProvider->data as $data )
+			{
+				if ($data->available_quantity>0)
+				{
+					echo "<tr>";
+					echo "<td>".$data->item_id."</td>";
+					echo "<td>".$data->company_id."</td>";
+					echo "<td>".$data->part_number."</td>";
+					echo "<td>".$data->name."</td>";
+					echo "<td>".$data->description."</td>";
+					echo "<td>".$data->barcode."</td>";
+					echo "<td>".$data->location_room."</td>";
+					echo "<td>".$data->location_row."</td>";
+					echo "<td>".$data->location_column."</td>";
+					echo "<td>".$data->location_shelf."</td>";
+					echo "<td>".$data->category_id."</td>";
+					echo "<td>".$data->current_quantity."</td>";
+					echo "<td>".$data->available_quantity."</td>";
+					echo "<td>".$data->recommended_lowest_quantity."</td>";
+					echo "<td>".$data->recommended_highest_quantity."</td>";
+					echo "<td>".$data->remarks."</td>";
+					echo "<td>".$data->active."</td>";
+					echo "<td>".$data->created."</td>";
+					echo "<td>".$data->modified."</td>";
+					echo "<td>".$data->deleted."</td>";
+					echo "</tr>";
+
+				}//end of if($data).
+
+				//echo $data->item_id, "\t",$data->company_id, "\t", $data->part_number, "\t", $data->name, "\t", $data->description, "\t", $data->barcode, "\t", $data->location_room,  "\t",$data->location_row, "\t", $data->location_column, "\t", $data->location_shelf, "\t", $data->category_id, "\t", $data->current_quantity, "\t", $data->available_quantity, "\t", $data->recommended_lowest_quantity, "\t", $data->recommended_highest_quantity, "\t", $data->remarks, "\t", $data->active, "\t", $data->created, "\t", $data->modified, "\t", $data->deleted,"\n";
+			}//end foreach
+			?>
+		</table>
+		<?php
+
+		Yii::app()->end();
+
+	}///end of 	protected exporttoexcel($data)
 }

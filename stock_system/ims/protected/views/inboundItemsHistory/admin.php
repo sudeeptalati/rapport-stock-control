@@ -22,6 +22,8 @@ $this->menu=array(
 		//'main_item_id',
 		array( 'name'=>'part_number', 'value'=>'$data->mainItem->part_number' ),
 		array( 'name'=>'item_search', 'value'=>'$data->mainItem->name' ),
+		array( 'name'=>'barcode', 'value'=>'$data->mainItem->barcode' ),
+
 		'quantity_moved',
 		'current_quantity_in_stock',
 		'available_quantity_in_stock',
@@ -31,10 +33,11 @@ $this->menu=array(
 // 					'type'=>'html',
 // 					'value'=>'$data->comments',
 // 			),
-			
-			array( 'name'=>'user_id', 'value'=>'$data->user->name','filter'=>false ),
-		
-			array( 
+
+		array( 'name'=>'user_id', 'value'=>'$data->user->name','filter'=>false ),
+		array( 'name'=>'supplier_id', 'value'=>'$data->supplier->name','filter'=>false ),
+
+		array(
 				'name'=>'created','value'=>'date("d-M-Y",$data->created)','filter'=>false
 			),	
 			

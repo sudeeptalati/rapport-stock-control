@@ -13,7 +13,13 @@
 
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/main.css" />
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/form.css" />
+	<!-- FONT AWESOME -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
+	<!-- Google Charts-->
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 	<title><?php echo CHtml::encode($this->pageTitle); ?></title>
 	<?php
 		$setupModel = Setup::model()->findByPk(1);
@@ -72,16 +78,17 @@ border-radius: 10px;">
 				//array('label'=>'About', 'url'=>array('/site/page', 'view'=>'about')),
 				//array('label'=>'Contact', 'url'=>array('/site/contact')),
 				array('label'=>'Items', 'url'=>array('/items/freeSearch/')),
-				array('label'=>'Inbound', 'url'=>array('/items/inboundSearch')),
-				array('label'=>'Outbound', 'url'=>array('/items/outboundSearch')),
-				array('label'=>'Purchase Order', 'url'=>array('/purchaseOrder/admin')),
-				array('label'=>'ItemsOnOrder', 'url'=>array('/itemOnOrder/admin')),
+				//array('label'=>'Inbound', 'url'=>array('/items/inboundSearch')),
+				//array('label'=>'Outbound', 'url'=>array('/items/outboundSearch')),
+				//array('label'=>'Purchase Order', 'url'=>array('/purchaseOrder/admin')),
+				//array('label'=>'ItemsOnOrder', 'url'=>array('/itemOnOrder/admin')),
 				//array('label'=>'Suppliers', 'url'=>array('/suppliers/admin')),
 				//array('label'=>'My Account', 'url'=>array('/userGroups/admin')),
 				//array('label'=>'Login', 'url'=>array('/userGroups'), 'visible'=>Yii::app()->user->isGuest),
 				//array('label'=>'My Account', 'url'=>array('/user/'.Yii::app()->user->id), 'visible'=>!Yii::app()->user->isGuest),
 				array('label'=>'Set Up', 'url'=>array('/setup/view&id=1')),
 				array('label'=>'Back Up', 'url'=>array('/site/backup'), 'visible'=>!Yii::app()->user->isGuest),
+				array('label'=>'Mobile', 'url'=>array('setup/otherdevices')),
 				
 				//array('label'=>'Login', 'url'=>array('/site/login'), 'visible'=>Yii::app()->user->isGuest),
 				//array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest),

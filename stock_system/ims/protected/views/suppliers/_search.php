@@ -26,8 +26,8 @@
 	</div>
 
 	<div class="row">
-		<?php echo $form->label($model,'postcode_s'); ?>
-		<?php echo $form->textField($model,'postcode_s'); ?>
+		<?php echo $form->label($model,'postcode'); ?>
+		<?php echo $form->textField($model,'postcode'); ?>
 	</div>
 
 	<div class="row">

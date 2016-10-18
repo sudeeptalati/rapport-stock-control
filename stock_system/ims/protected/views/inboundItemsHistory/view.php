@@ -29,17 +29,28 @@ $this->menu=array(
 		'available_quantity_in_stock',
 		'comments',
 		//'user_id',
-//		'user.username',
+//		'user.username'
+//
+//,
 		array(  'name'=>'user_id',
-				'value'=>$model->user->username,	
-			),	
-		 
+			'value'=>$model->user->username,
+		),
 
-	/*
-		array(  'name'=>'items_on_order_id',
-				'value'=>$model->itemsOnOrder->purchaseOrder->order_number,
-			),	
-	*/		
+		array(  'name'=>'supplier_id',
+			'value'=>$model->supplier->name,
+		),
+
+ 
+        array(  'name'=>'item_purchase_date',
+ 					'value'=>(Setup::model()->formatdate($model->item_purchase_date)),
+ 			),
+
+
+		/*
+            array(  'name'=>'items_on_order_id',
+                    'value'=>$model->itemsOnOrder->purchaseOrder->order_number,
+                ),
+        */
 			
 		//'items_on_order_id',
 

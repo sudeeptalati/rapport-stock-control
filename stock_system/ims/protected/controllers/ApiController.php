@@ -22,6 +22,52 @@ class ApiController extends Controller
     }
  
     // Actions
+    public function actionLoaditembyitemid()
+    {
+     	if(isset($_GET['item_id']))
+    		$main_item_id=$_GET['item_id'];
+		else{
+			$msg='Item id Missing ';
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+		}
+		
+		
+		
+		
+		$itemModel=Items::model()->findByPk($main_item_id);
+		$itemModel->setAttribute("company_id",$itemModel->suppliers->name);
+		
+		$itemModel->setAttribute("factory_due_date",$this->formatdate($itemModel->factory_due_date));
+		$itemModel->setAttribute("created",$this->formatdate($itemModel->created));
+		$itemModel->setAttribute("modified",$this->formatdate($itemModel->modified));
+		$itemModel->setAttribute("stock_date",$this->formatdate($itemModel->stock_date));
+		$itemModel->setAttribute("purchase_date",$this->formatdate($itemModel->purchase_date));
+		
+		$itemModel->setAttribute("comments",Setup::model()->printjsonnotesorcommentsinhtml($itemModel->comments));
+	 
+		
+	 
+		
+		if ($itemModel)
+		{
+			$results = array ('results'=>$itemModel);
+		   	$this->_sendResponse(200, CJSON::encode($results));
+		}else
+		{
+			$msg='Cannot find the item';
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+		}
+
+    }///end of public function actionLoaditembyitemid()
+    
+    
+    
+    
+    
+    
+    
     public function actionItemFreeSearch()
     {
     	    //$this->_checkAuth();
@@ -29,22 +75,30 @@ class ApiController extends Controller
 		    // Check if id was submitted via GET
 		    //URL to access ItemFreeSearch is /root/api/ItemFreeSearch/model/keyword
 		    
-    		$keyword=$_GET['keyword'];
+    
+    		if(!isset($_GET['keyword']))
+		        $this->_sendResponse(500, 'Error: Parameter <b>keyword</b> is missing' );
+			
+			if(!isset($_GET['model']))
+		        $this->_sendResponse(500, 'Error: Parameter <b>model</b> is missing' );
+		 	
+		 
+		 	$keyword=$_GET['keyword'];
     		$oldmodel=$_GET['model'];
-    		
     		//echo "Keu is =".$keyword." MODEL is ".$oldmodel;
     		
 		   // if(!isset($_GET['id']))
-    		if(!isset($keyword))
-		        $this->_sendResponse(500, 'Error: Parameter <b>keyword</b> is missing' );
-		 
+    		
 		    switch($_GET['model'])
 		    {
 		        // Find respective model    
 		        case 'Items':
 		            //$model = Items::model()->findByPk($_GET['id']);
-		        	$model=Items::model()->freeSearch($keyword);
+		        	$results=Items::model()->freeSearch($keyword);
+		        	$allitems=$results->getData();
 		        	break;
+		        	
+		        	
 		        default:
 		            $this->_sendResponse(501, sprintf(
 		                'Mode <b>view</b> is not implemented for model <b>%s</b>',
@@ -52,13 +106,13 @@ class ApiController extends Controller
 		            exit;
 		    }
 		    // Did we find the requested model? If not, raise an error
-		    if(is_null($model))
+		    if(is_null($allitems))
 		        $this->_sendResponse(404, 'No Item found with id '.$_GET['id']);
 		    else{
 		        //$this->_sendResponse(200, CJSON::encode($_GET['model']));
 		    	
-		    	$results = array ('results'=>$model);
-		    	$this->_sendResponse(200, CJSON::encode($results));
+		    	$results_array = array ('results'=>$allitems);
+		    	$this->_sendResponse(200, CJSON::encode($results_array));
 		    }///end of else of if
 		    
     	
@@ -67,9 +121,23 @@ class ApiController extends Controller
     public function actionOutbound()
     {
     	//getting values from url.
-    	$main_item_id=$_GET['item_id'];
-    	$oldmodel=$_GET['model'];
-    	$quantity_moved=$_GET['quantity_moved'];
+    	if(isset($_POST['item_id']))
+    		$main_item_id=$_POST['item_id'];
+		else{
+			$msg='Item id Missing ';
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+		}
+		
+		if(isset($_POST['quantity_moved']))
+    		$quantity_moved=$_POST['quantity_moved']; 
+       	else{
+			$msg='quantity moved id Missing ';
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+		}
+		 
+
     	
     	//echo "quantity Moved is : ".$quantity_moved."		Item id is: ".$main_item_id."		CLASSmodel is: ".$oldmodel;
     	
@@ -83,31 +151,43 @@ class ApiController extends Controller
 			$model->available_quantity_in_stock= $itemModel->available_quantity;
 			$current_quantity_in_stock=$model->current_quantity_in_stock;
 			$available_quantity_in_stock=$model->available_quantity_in_stock;
-//			echo "<br>";
-//			echo "current quantiy :".$current_quantity_in_stock."  available quantity:".$available_quantity_in_stock;
-		}
+			
+			//saving values to outbound 
+			$model->main_item_id=$main_item_id;
+			$model->available_quantity_in_stock=$available_quantity_in_stock;
+			$model->current_quantity_in_stock=$current_quantity_in_stock;
+			$model->quantity_moved=$quantity_moved;
+			$model->comments="Via API / Mobile App";
+			
+			if($model->save())
+			{
+		 	
+			
+			}
+			else 
+			{
+				$msg='';
+				$errors=$model->getErrors();
+				foreach ($errors as $e)
+				{
+					$msg.="-----".$e[0]; 
+				}				
+
+				$results = array ('results'=>$msg);
+				$this->_sendResponse(400, CJSON::encode($results));
+			}
+		
+		
+		
+ 		}
 		else
-			echo "Item not found";
-		
-		//saving values to outbound 
-		$model->main_item_id=$main_item_id;
-		$model->available_quantity_in_stock=$available_quantity_in_stock;
-		$model->current_quantity_in_stock=$current_quantity_in_stock;
-		$model->quantity_moved=$quantity_moved;
-		//$model->save();
-		
-		if($model->save())
 		{
-//			echo "<br>";
-//			echo "in model->save()";
-//			echo "current quantiy :".$model->current_quantity_in_stock."  available quantity:".$model->available_quantity_in_stock;
-			
-			
+			$msg='No Item found with id '.$main_item_id; 	
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
 		}
-		else 
-		{
-			echo "unable to save";
-		}
+		
+	
 		
 		//updating items table.
 		
@@ -120,54 +200,100 @@ class ApiController extends Controller
 								)														
 								);		
 		//output in JSON
-		 if(is_null($model))
-		        $this->_sendResponse(404, 'No Item found with id '.$_GET['id']);
-		    else
-		    {
-		       // $this->_sendResponse(200, CJSON::encode($_GET['model']));
-		    	
-		    	$results = array ('results'=>$model);
-		    	$this->_sendResponse(200, CJSON::encode($results));
-		    }///end of else of if
+		if(is_null($model))
+		      $this->_sendResponse(404, 'No Item found with id '.$main_item_id);
+		else
+		{
+		     // $this->_sendResponse(200, CJSON::encode($_GET['model']));
+		    $msg="Sucessfully Saved";
+		  	$results = array ('results'=>$msg);
+		   	$this->_sendResponse(200, CJSON::encode($results));
+		}
 		
     }//end of actionOutbound.
     
     public  function actionInbound()
     {
-    	//getting data from url.
-    	$main_item_id=$_GET['item_id'];
-    	$oldmodel=$_GET['model'];
-    	$quantity_moved=$_GET['quantity_moved']; 
-//    	echo "quantity Moved is : ".$quantity_moved."		Item id is: ".$main_item_id."		CLASSmodel is: ".$oldmodel;   	
     	
-    	$model=new InboundItemsHistory;
+    	if(isset($_POST['item_id']))
+    		$main_item_id=$_POST['item_id'];
+		else{
+			$msg='Item id Missing ';
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+		}
+		
+		
+		if(isset($_POST['quantity_moved']))
+    		$quantity_moved=$_POST['quantity_moved']; 
+       	else{
+			$msg='quantity moved id Missing ';
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+		}
+		
+       
+        if(isset($_POST['supplier_id']))
+    		$supplier_id=$_POST['supplier_id'];
+    	else{
+			$msg='supplier id id Missing ';
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+		}
+		
+    	
     	
         $itemModel=Items::model()->findByPk($main_item_id);
+
 		if ($itemModel)
 		{
+			
+	    	$model=new InboundItemsHistory;
+	    	
 			$model->current_quantity_in_stock= $itemModel->current_quantity;
 			$model->available_quantity_in_stock= $itemModel->available_quantity;
 			$current_quantity_in_stock=$model->current_quantity_in_stock;
 			$available_quantity_in_stock=$model->available_quantity_in_stock;
-//			echo "<br>";
-//			echo "current quantiy :".$current_quantity_in_stock."  available quantity:".$available_quantity_in_stock;
+
+
+			$model->main_item_id=$main_item_id;
+			$model->available_quantity_in_stock=$available_quantity_in_stock;
+			$model->current_quantity_in_stock=$current_quantity_in_stock;
+			$model->quantity_moved=$quantity_moved;
+			$model->supplier_id=$supplier_id;
+			$model->comments="Via API / Mobile App";
+
+			if($model->save())
+			{
+				//echo "available_quantity_in_stock = ".$available_quantity_in_stock."current_quantity_in_stock = ".$current_quantity_in_stock;
+			}
+			else 
+			{
+
+				$msg='';
+				//$msg.='ERROR:'.var_dump($model->getErrors());
+				$errors=$model->getErrors();
+				foreach ($errors as $e)
+				{
+					$msg.="-----".$e[0]; 
+				}				
+
+				$results = array ('results'=>$msg);
+				$this->_sendResponse(400, CJSON::encode($results));
+			}
+
 		}
 		else 
-			echo "Item not found";
+		{
+		 	$msg='No Item found with id '.$main_item_id;
+		 	
+		 	$results = array ('results'=>$msg);
+			$this->_sendResponse(400, CJSON::encode($results));
+				
+				
+		}
 		
 		//saving values to inbound table 
-		$model->main_item_id=$main_item_id;
-		$model->available_quantity_in_stock=$available_quantity_in_stock;
-		$model->current_quantity_in_stock=$current_quantity_in_stock;
-		$model->quantity_moved=$quantity_moved;
-		if($model->save())
-		{
-//			echo "available_quantity_in_stock = ".$available_quantity_in_stock."current_quantity_in_stock = ".$current_quantity_in_stock;
-		}
-		else 
-			echo "Unable to save";
-			
-		//updating items table.
 		
 		$itemModel->updateByPk(
 								$model->main_item_id,
@@ -179,16 +305,38 @@ class ApiController extends Controller
 								);		
 		//output in JSON
 		if(is_null($model))
-		      $this->_sendResponse(404, 'No Item found with id '.$_GET['id']);
+		      $this->_sendResponse(404, 'No Item found with id '.$main_item_id);
 		else
 		{
 		     // $this->_sendResponse(200, CJSON::encode($_GET['model']));
-		    	
-		  	$results = array ('results'=>$model);
+		    $msg="Sucessfully Saved";
+		  	$results = array ('results'=>$msg);
 		   	$this->_sendResponse(200, CJSON::encode($results));
 		}///end of else of if
 		
     }//end of actionInbound.
+    
+    
+    public function actionGetactivesupplierslist()
+    {
+    
+ 	   	$listdata = CHtml::listData(Suppliers::model()->findAll(array('condition' => 'active=1', 'order' => "`name` ASC")),'id', 'name' );
+	    	
+    	$alldata=array();	
+    	foreach ($listdata as $key=>$value)
+    	{
+    		$each_record=array();
+    		$each_record['supplier_id']=$key;
+    		$each_record['supplier_name']=$value;
+    		array_push($alldata,$each_record);
+    	}
+    	
+    	$results = array ('results'=>$alldata);
+
+    	$this->_sendResponse(200, CJSON::encode($results));
+    }///ennd of public function actionGetactivesupplierslist()
+
+    
     
     public function actionList()
     {
@@ -206,6 +354,15 @@ class ApiController extends Controller
     public function actionDelete()
     {
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     private function _sendResponse($status = 200, $body = '', $content_type = 'text/html')
     {
@@ -312,75 +469,30 @@ class ApiController extends Controller
     }//end of function checkAuth
     
     
-	
-	
-	
-    public function actionUpdatestockfromcsvwithpartnumber()
-    {
-    
-		/////////STEP 1 Read The file Line by Line
-		////The first part of file is npart number and second part is stock value. So you need to store both in variables
-
-    	//echo "<h1>Hello</h1>";		
-		//$filename='stockupdate.csv';
-		$file_handle = fopen("stockupdate.csv","r");
-
-		$i=0;
-
-		while (!feof($file_handle) ) {
-
-		$line_of_text = fgetcsv($file_handle, 1024);
-
-		//echo $i.".".$line_of_text[0]."-".$line_of_text[1]."<BR>";
-		
-		$partnumber=$line_of_text[0];
-		echo "<br>".$i."-".$partnumber."<br>";
-		$stockvalue=$line_of_text[1];
-		$item_id=$this->getidbypartnumber($partnumber,$stockvalue);
-		$i++;
-		
-		
-		}///end of while
-		fclose($file_handle);
-
-		
-		
-		
-		
-    }////end of actionUpdatestockfromcsvwithpartnumber
-	
-	
-////Step 2 ; find by attribute (partnumber)
-///extracxt the id (PK) of that part number	
-	public function getidbypartnumber($partnumber,$stockvalue)
+ 	public function formatdate($d)
 	{
-		if($model=Items::model()->findByAttributes(array('part_number'=>$partnumber)))
-		{
-		echo '<hr> ITEM ID- '.$model->item_id."<BR>";
-		$id=$model->item_id;
-		$this->updateitemstable($id,$stockvalue);
-		}
+		if ($d != '' || $d != NULL)
+			return date('d-M-Y', $d);
 		else
-		{
-		echo "This PartNumber not found in database";
-		}
-	}///end of public getidbypartnumber($partnumber,$stockvalue)
-	
+			return '';
+	}
 
-	public function updateitemstable($id,$stockvalue)
-	///Step 3 /// Update by PK item table with the 
+	public function formatdatewithtime($d)
 	{
-	$itemModel=Items::model()->findByPk($id);
-	$itemModel->updateByPk(
-								$id,
-								array
-								(
-									'available_quantity'=>$stockvalue,
-									'current_quantity'=>$stockvalue,
-								)														
-								);		
-	echo '<hr>'.$itemModel->available_quantity."<BR>".$itemModel->current_quantity;
-	}/////end of   updateItemstable($id,$stockvalue)
+		if ($d != '' || $d != NULL)
+			return date('d-M-Y h:i A', $d);
+		else
+			return '';
+	}
+
+	public function formatonlytime($d)
+	{
+		if ($d != '' || $d != NULL)
+			return date('H:i A', $d);
+		else
+			return '';
+	}
+
     
     
 }///end of class 
